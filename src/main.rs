@@ -837,6 +837,9 @@ fn run() -> Result<ExitCode> {
                 "`--count 0` records nothing: pass --count 1 or more, or give cases with --inputs or \
                  --from-tests"
             );
+            let float_tolerance = float_tolerance
+                .map(rust_anything::tolerance::check)
+                .transpose()?;
             let inputs = if from_tests {
                 let c = rust_anything::from_tests::capture(&crate_dir, &test_command)?;
                 say!(
@@ -864,7 +867,7 @@ fn run() -> Result<ExitCode> {
             };
             if let Some(t) = float_tolerance {
                 let mut manifest = bridge::Manifest::load(&crate_dir)?;
-                manifest.float_tolerance = (rust_anything::tolerance::check(t)? > 0.0).then_some(t);
+                manifest.float_tolerance = (t > 0.0).then_some(t);
                 manifest.save(&crate_dir)?;
             }
             if ignore_key_order || no_ignore_key_order {

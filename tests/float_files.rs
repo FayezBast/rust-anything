@@ -75,6 +75,16 @@ fn negative_float_tolerance_after_a_space_gets_the_range_message() {
     let dir_arg = dir.to_str().unwrap();
     for args in [
         vec!["diff", dir_arg, "--float-tolerance", "-0.5"],
+        vec!["record", dir_arg, "--float-tolerance", "-1"],
+        vec![
+            "record",
+            dir_arg,
+            "--float-tolerance",
+            "2",
+            "--from-tests",
+            "--",
+            "unused-test-command",
+        ],
         vec![
             "app",
             "record",
