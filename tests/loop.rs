@@ -187,6 +187,29 @@ fn diff_rejects_an_empty_recording() {
 }
 
 #[test]
+fn record_rejects_a_device_on_host_before_saving_settings() {
+    let dir = bridged("record-host-device");
+    let manifest = dir.join(bridge::MANIFEST);
+    let before = std::fs::read(&manifest).unwrap();
+    let out = Command::new(env!("CARGO_BIN_EXE_rust-anything"))
+        .arg("record")
+        .arg(&dir)
+        .args(["--ignore-key-order", "--device", "x"])
+        .output()
+        .unwrap();
+    let after = std::fs::read(&manifest).unwrap();
+    std::fs::remove_dir_all(dir).unwrap();
+
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert_eq!(out.status.code(), Some(2), "{stderr}");
+    assert!(
+        stderr.contains("`--device` needs `--profile android`"),
+        "{stderr}"
+    );
+    assert_eq!(before, after, "record changed the manifest");
+}
+
+#[test]
 fn record_and_diff_catch_a_behavior_change() {
     if !common::have("node") {
         return;

@@ -829,6 +829,10 @@ fn run() -> Result<ExitCode> {
             no_pin_clock,
         } => {
             anyhow::ensure!(
+                profile != Profile::Host || device.is_none(),
+                "`--device` needs `--profile android`"
+            );
+            anyhow::ensure!(
                 from_tests || test_command.is_empty(),
                 "a command after `--` is the test suite for `--from-tests`; add the flag"
             );
@@ -890,12 +894,7 @@ fn run() -> Result<ExitCode> {
                 node_args: &node_args,
             };
             let outcome = match profile {
-                Profile::Host => {
-                    if device.is_some() {
-                        anyhow::bail!("`--device` needs `--profile android`");
-                    }
-                    harness::record(&opts)?
-                }
+                Profile::Host => harness::record(&opts)?,
                 Profile::Android => harness::record_android(&opts, device.as_deref())?,
             };
             say!(
