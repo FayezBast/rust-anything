@@ -347,7 +347,7 @@ fn status_label(status: Status) -> &'static str {
 
 #[cfg(test)]
 mod tests {
-    use super::count;
+    use super::{count, markdown};
 
     #[test]
     fn one_is_singular_and_everything_else_plural() {
@@ -356,5 +356,26 @@ mod tests {
         assert_eq!(count(2, "line"), "2 lines");
         assert_eq!(count(1, "hot function"), "1 hot function");
         assert_eq!(count(7, "hot function"), "7 hot functions");
+    }
+
+    #[test]
+    fn python_risk_guide_describes_slicing_and_exceptions() {
+        let root = crate::app::temp_dir("python-risk-guide").unwrap();
+        std::fs::write(
+            root.join("text.py"),
+            "def head(s: str, n: int) -> str:\n    try:\n        return s[:n]\n    except ValueError:\n        raise\n",
+        )
+        .unwrap();
+        let report = crate::analyze::analyze_lang(&root, crate::lang::Lang::Python).unwrap();
+        std::fs::remove_dir_all(root).unwrap();
+
+        let plan = markdown(&report, "Python text");
+        let (_, guide) = plan.split_once("## Risk guide\n").unwrap();
+        assert!(
+            guide.contains("- **String offsets and slicing**"),
+            "{guide}"
+        );
+        assert!(guide.contains("- **Exceptions**"), "{guide}");
+        assert!(!guide.contains("JS"), "{guide}");
     }
 }

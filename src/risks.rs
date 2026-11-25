@@ -1,8 +1,8 @@
-//! The catalog of TypeScript/JavaScript behaviors that do not carry over to Rust as-is.
+//! The catalog of source-language behaviors to account for when porting to Rust.
 
 use serde::Serialize;
 
-/// A construct whose JS semantics differ from the obvious Rust translation.
+/// A construct whose source-language semantics differ from the obvious Rust translation.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Risk {
@@ -138,8 +138,9 @@ impl Risk {
     pub fn guidance(self) -> &'static str {
         match self {
             Self::StringOffsets => {
-                "JS indexes strings in UTF-16 code units, Rust in UTF-8 bytes. Offsets that cross \
-                 the boundary must be converted, or non-ASCII text gets wrong ranges silently."
+                "Rust slices strings at UTF-8 byte offsets that fall on character boundaries. \
+                 Convert offsets from the source's indexing units as needed and test with \
+                 non-ASCII text."
             }
             Self::RegexSyntax => {
                 "Lookaround, backreferences and the `y` flag are not in the `regex` crate. Use \
@@ -169,8 +170,8 @@ impl Risk {
                  on V8's algorithm."
             }
             Self::Exceptions => {
-                "Thrown errors become `Result`. Errors crossing the bridge must map back to the \
-                 same JS error shape."
+                "Represent source exceptions with `Result`. Preserve the original exception type \
+                 and message when errors cross the bridge."
             }
             Self::Async => {
                 "Promises become futures. Bridge with napi-rs `async fn` or `wasm-bindgen-futures`, \
