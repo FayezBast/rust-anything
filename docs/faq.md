@@ -91,7 +91,8 @@ is what moves well.
 it is. Moving the UI to Tauri (the same web UI on a Rust backend) is a separate step once the logic
 is Rust.
 
-**What about C#, Kotlin or Swift?** C# is supported for whole apps, and Kotlin for Gradle modules of
+**What about C#, Kotlin or Swift?** C# is supported for units of `public static` methods through
+P/Invoke and for whole apps, and Kotlin for Gradle modules of
 top-level functions and `@JvmStatic` methods (see [Languages](../README.md#languages)); Swift is not
 supported yet. Each language needs a parser, a recorder, a bridge and a replay
 driver, all tested end to end. Open an issue (or upvote one) for the language you need.
